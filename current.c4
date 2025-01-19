@@ -1,0 +1,153 @@
+specification {
+  element domainProvider
+  deploymentNode domainName
+  deploymentNode hostingProvider
+  deploymentNode serviceProvider
+  element domainName {
+    style {
+      color red
+      opacity 10%
+    }
+  }
+  element user {
+    style {
+      color green
+      shape person
+    }
+  }
+  element component
+  element webapp {
+    style {
+      shape browser
+    }
+  }
+  element system {
+    style {
+      opacity 20%
+      color blue
+    }
+  }
+  element vendors {
+    style {
+      color gray
+      opacity 10%
+    }
+  }
+  element group {
+    style {
+      color gray
+      opacity 10%
+    }
+  }
+  relationship dnsrecord {
+    color amber
+    line dotted
+    head diamond
+    tail vee
+  }
+}
+
+model {
+  group assocation 'Assocation' {
+    user digitalManager 'Digital Manager' {
+      description 'Responsible for IT management'
+      -> ukcheapest 'Manages billing and website'
+      -> mailerlite 'Manages email list and sends newsmails'
+      -> domaincom 'Manages billing and nameservers'
+      -> zoho 'Manages billing and accounts'
+    }
+    user committee 'Committee' {
+      description 'Elected member of the assocations committee'
+      -> zohoMail 'Reads and sends emails from'
+      -> digitalManager 'Emails'
+    }
+  }
+
+  user thirdParty 'Third Party' 'Bexley Council Official'
+  
+  user resident 'Resident' {
+    description 'Resident of North Cray, Bexley'
+  }
+
+  system services 'Online Services' {
+    system mailerlite 'MailerLite' {
+      description 'Batch email marketing'
+      link https://www.mailerlite.com/
+    }
+
+    system zoho 'Zoho' {
+      description 'Business Software'
+      link https://www.zoho.com/
+
+      component zohoMail 'Zoho Mail' {
+        description 'Email Account Hosting'
+        link https://www.zoho.com/mail
+
+        -> thirdParty 'Emails'
+      }
+    }
+
+    webapp website 'Website' {
+      description 'Static hosted HTML pages'
+      link https://northcrayresidents.org.uk/
+    }
+  }
+
+  system domains 'Domain Names' {
+    domainProvider domaincom 'Domain.com' {
+      description 'Domain name provider for ncramail.org'
+      
+      domainName ncramailorg 'ncramail.org' {
+        link https://ncramail.org
+        -> zohoMail
+        -> mailerlite
+      }
+    }
+
+    domainProvider ukcheapest 'UK-Cheapest' {
+      description 'Domain and Web Hosting'
+      link https://www.uk-cheapest.co.uk/
+      
+      metadata {
+        annualCost '£83.13'
+      }
+
+      domainName northcrayresidentsorguk 'northcrayresidents.org.uk' {
+        link https://northcrayresidents.org.uk
+        -> website
+      }
+    }
+  }
+
+  resident -> website 'Visits'
+  mailerlite -> resident 'Sends email to'
+}
+
+
+views {
+  view index {
+    include services.**, assocation.**, domains.**, *
+    exclude element.kind = domainName
+  	autoLayout TopBottom
+	}
+  view resident {
+    title 'Resident Context'
+    include resident -> services.**, services.** -> resident
+  	autoLayout LeftRight
+	}
+  view digital {
+    title 'Digital Services'
+    include services.**, domains.*, 
+  	autoLayout LeftRight
+	}
+  view newsmail {
+    title 'Newsmail/Groupmail'
+    description 'How residents recieve emails'
+    include assocation.**, mailerlite, resident
+  }
+  view domains {
+    title 'Domains names'
+    include element.kind = domainName, services.**, website
+  	autoLayout TopBottom
+	}
+}
